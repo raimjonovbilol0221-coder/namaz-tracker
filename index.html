@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102b22">
+<meta name="description" content="Учёт ежедневных намазов и восполнение қаза. Работает офлайн после установки.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Намаз Трекер</title>
+<style>
+:root{--bg:#0b1713;--panel:#12251d;--panel2:#193328;--line:#294638;--text:#f2f5ef;--muted:#a8b9ad;--gold:#d6b66b;--green:#74bd8b;--red:#d88c7e}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#183729 0,#0b1713 55%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:960px;margin:auto;padding:26px 18px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}.install-btn{display:none;margin-top:8px;font-size:12px;padding:7px 10px}.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border:1px solid #6c6543;border-radius:14px;display:grid;place-items:center;color:var(--gold);font-size:24px;background:#1b3026}.eyebrow{color:var(--gold);font-size:12px;letter-spacing:.14em;text-transform:uppercase}.top h1{font-size:23px;margin:2px 0 0}.date{color:var(--muted);text-align:right;font-size:13px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.tab{border:1px solid var(--line);background:#10221a;color:var(--muted);padding:10px 15px;border-radius:12px;cursor:pointer;font-weight:600}.tab.active{background:var(--gold);color:#17251c;border-color:var(--gold)}
+.panel{background:linear-gradient(145deg,rgba(25,51,40,.96),rgba(16,34,26,.96));border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 12px 35px #0002}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.section-head h2{font-size:18px;margin:0}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}
+.progress-row{display:flex;align-items:end;justify-content:space-between;gap:12px}.big{font-size:36px;font-weight:750;letter-spacing:-1px}.big span{font-size:15px;color:var(--muted);font-weight:500}.bar{height:9px;border-radius:20px;background:#0a1711;overflow:hidden;margin:12px 0 17px}.bar>div{height:100%;background:linear-gradient(90deg,#78c18d,#d6b66b);border-radius:20px;transition:width .2s}
+.prayers{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.prayer{background:#10231a;border:1px solid var(--line);border-radius:15px;padding:13px 10px;text-align:center}.prayer.done{border-color:#538b64;background:#173526}.prayer .symbol{font-size:21px;color:var(--gold)}.prayer h3{margin:4px 0;font-size:14px}.prayer .time{font-size:12px;color:var(--muted);margin-bottom:10px}.check{width:100%;border:0;border-radius:9px;padding:9px 5px;background:#294638;color:#eaf3eb;cursor:pointer;font-weight:650}.done .check{background:#74bd8b;color:#102218}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:13px;color:var(--muted)}input,select{width:100%;background:#0d1d16;color:var(--text);border:1px solid #355442;border-radius:10px;padding:11px 12px;font:inherit;min-width:0}input:focus,select:focus{outline:2px solid #7dbb8b;outline-offset:1px}
+.btn{background:var(--gold);color:#1a281e;border:0;border-radius:11px;padding:11px 15px;font-weight:750;cursor:pointer}.btn.secondary{background:#294638;color:var(--text);border:1px solid #42634e}.btn.danger{background:#472b28;color:#ffd8d1;border:1px solid #70443d}.btn:active,.tab:active,.check:active{transform:translateY(1px)}
+.qaza-list{display:grid;gap:9px}.qaza-row{display:grid;grid-template-columns:1fr 110px;align-items:center;gap:12px;background:#10231a;border:1px solid var(--line);padding:11px 13px;border-radius:12px}.qaza-row strong{display:block}.qaza-row input{text-align:center;font-weight:700}
+.task{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}.task.done-task{opacity:.55}.task.done-task strong{text-decoration:line-through}.task-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.empty{color:var(--muted);padding:15px 0;text-align:center}.hidden{display:none!important}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#10231a;border:1px solid var(--line);border-radius:13px;padding:14px}.stat strong{display:block;font-size:24px;color:var(--gold)}.notice{font-size:12px;color:var(--muted);margin-top:12px}
+@media(max-width:680px){.wrap{padding:18px 12px 35px}.prayers{grid-template-columns:repeat(2,1fr)}.prayer:last-child{grid-column:span 2}.grid{grid-template-columns:1fr}.top h1{font-size:20px}.date{max-width:130px}.panel{padding:16px}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:span 2}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+ <div class="brand"><div class="logo">☾</div><div><div class="eyebrow">Ежедневная практика</div><h1>Намаз Трекер</h1></div></div>
+ <div class="date"><div id="todayLabel"></div><button class="btn install-btn" id="installApp">Установить приложение</button></div>
+</header>
+<nav class="tabs">
+ <button class="tab active" data-tab="daily">Ежедневно</button>
+ <button class="tab" data-tab="qaza">Қаза намазы</button>
+ <button class="tab" data-tab="stats">Статистика</button>
+</nav>
+
+<section id="daily" class="view">
+ <div class="panel">
+  <div class="section-head"><h2>Сегодняшние намазы</h2><span class="small" id="dailyDate"></span></div>
+  <div class="progress-row"><div><div class="big" id="dailyCount">0 <span>/ 5</span></div><div class="muted">намазов отмечено</div></div><div class="small" id="dailyPercent">0% выполнено</div></div>
+  <div class="bar"><div id="dailyBar" style="width:0%"></div></div>
+  <div class="prayers" id="prayerCards"></div>
+  <div class="notice">Если намаз пропущен, нажми «Пропущен (+1 қаза)» — он добавится к долгу. Отмечать прочитанный қаза можно отдельно на вкладке «Қаза намазы». Данные сохраняются на этом устройстве.</div>
+ </div>
+</section>
+
+<section id="qaza" class="view hidden">
+ <div class="panel">
+  <div class="section-head"><h2>Отметить прочитанный қаза</h2><span class="small">Как обычный намаз</span></div>
+  <p class="muted" style="margin-top:0">Выбери нужный намаз и нажми кнопку после прочтения. Остаток уменьшится на один, а выполнение сохранится в истории.</p>
+  <div class="qaza-list" id="qazaCompleteList"></div>
+  <div class="notice" id="qazaDoneToday">Сегодня восполнено: 0</div>
+ </div>
+ <div class="panel">
+  <div class="section-head"><h2>Рассчитать пропущенные намазы</h2><span class="small">По периоду дат</span></div>
+  <p class="muted" style="margin-top:0">Выбери первый и последний день периода, когда намазы не читались. Приложение посчитает дни включительно и добавит по одному қаза каждого из пяти намазов за каждый день.</p>
+  <div class="grid">
+   <div class="field"><label for="missedFrom">С какой даты</label><input id="missedFrom" type="date"></div>
+   <div class="field"><label for="missedTo">По какую дату включительно</label><input id="missedTo" type="date"></div>
+  </div>
+  <div class="small" id="periodPreview">Выбери даты для расчёта.</div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:12px">
+   <button type="button" class="btn" id="calculatePeriod">Рассчитать и добавить</button>
+   <button type="button" class="btn secondary" id="previewPeriod">Показать расчёт</button>
+  </div>
+  <p class="notice">Расчёт предполагает, что пропущены все 5 обязательных намазов каждый день. Если были дни или отдельные намазы, которые не нужно учитывать, скорректируй остатки вручную ниже.</p>
+ </div>
+ <div class="panel">
+  <div class="section-head"><h2>Остаток қаза намазов</h2><span class="small">Можно изменить вручную</span></div>
+  <div class="qaza-list" id="qazaInputs"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:15px;flex-wrap:wrap">
+   <div class="muted">Всего осталось: <strong id="qazaTotal" style="color:var(--gold)">0</strong></div>
+   <button class="btn" id="saveQaza">Сохранить остаток</button>
+  </div>
+ </div>
+ <div class="panel">
+  <div class="section-head"><h2>Быстро добавить қаза</h2></div>
+  <div class="grid">
+   <div class="field"><label for="quickPrayer">Какой намаз</label><select id="quickPrayer"></select></div>
+   <div class="field"><label for="quickAmount">Количество</label><input id="quickAmount" type="number" min="1" step="1" value="1"></div>
+  </div>
+  <button class="btn secondary" id="quickAdd">Добавить к остатку</button>
+  <p class="notice">После прочтения қаза отметь его в верхнем блоке этого экрана — остаток уменьшится на 1.</p>
+ </div>
+</section>
+
+<section id="stats" class="view hidden">
+ <div class="panel">
+  <div class="section-head"><h2>Моя статистика</h2></div>
+  <div class="stats">
+   <div class="stat"><strong id="statToday">0/5</strong><span class="small">Сегодня</span></div>
+   <div class="stat"><strong id="statWeek">0</strong><span class="small">Обычных намазов за 7 дней</span></div>
+   <div class="stat"><strong id="statQaza">0</strong><span class="small">Қаза выполнено</span></div>
+  </div>
+  <div class="section-head" style="margin-top:22px"><h2>Последние дни</h2></div>
+  <div id="history"></div>
+ </div>
+</section>
+</div>
+<script>
+const NAMES=['Фаджр','Зухр','Аср','Магриб','Иша'];
+const KEY='namazTracker_v1';
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const fresh=()=>({daily:{},qaza:{Фаджр:0,Зухр:0,Аср:0,Магриб:0,Иша:0},tasks:[],qazaDone:[]});
+let data;try{data={...fresh(),...JSON.parse(localStorage.getItem(KEY)||'{}')};}catch(e){data=fresh()}
+data.qazaDone=Array.isArray(data.qazaDone)?data.qazaDone:[];data.qaza=data.qaza||{};NAMES.forEach(n=>data.qaza[n]=Math.max(0,Number(data.qaza[n]||0)));data.daily=data.daily||{};
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function dayData(date=today()){if(!data.daily[date])data.daily[date]={};return data.daily[date]}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function options(){return NAMES.map(n=>`<option value="${n}">${n}</option>`).join('')}
+document.querySelector('#quickPrayer').innerHTML=options();
+
+function render(){
+ const date=today(),d=dayData(date);
+ document.querySelector('#todayLabel').textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ document.querySelector('#dailyDate').textContent=new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ const status=n=>d[n]===true?'read':(d[n]===false||!d[n]?'none':d[n]);
+ const readCount=NAMES.filter(n=>status(n)==='read').length;
+ const missedCount=NAMES.filter(n=>status(n)==='missed').length;
+ document.querySelector('#dailyCount').innerHTML=`${readCount} <span>/ 5</span>`;
+ document.querySelector('#dailyPercent').textContent=`${missedCount} пропущено`;
+ document.querySelector('#dailyBar').style.width=(readCount*20)+'%';
+ document.querySelector('#prayerCards').innerHTML=NAMES.map((n,i)=>{const st=status(n);return `<div class="prayer ${st==='read'?'done':''}" style="${st==='missed'?'border-color:#9a6258;background:#34231f':''}"><div class="symbol">${['☀','◒','◉','☼','☾'][i]}</div><h3>${n}</h3><div class="time">${st==='read'?'Прочитан':st==='missed'?'Пропущен · добавлен в қаза':'Ещё не отмечен'}</div><div style="display:grid;gap:6px"><button class="check" data-status="read" data-prayer="${n}" style="${st==='read'?'background:#74bd8b;color:#102218':''}">${st==='read'?'✓ Прочитан':'Отметить прочитан'}</button><button class="check" data-status="missed" data-prayer="${n}" style="background:${st==='missed'?'#9a6258':'#472b28'};color:#ffe6df">${st==='missed'?'↶ Отменить пропуск':'Пропущен (+1 қаза)'}</button></div></div>`}).join('');
+ document.querySelectorAll('[data-status][data-prayer]').forEach(b=>b.onclick=()=>{
+   const n=b.dataset.prayer, next=b.dataset.status, x=dayData(), prev=status(n);
+   if(prev===next){return}
+   if(prev==='missed')data.qaza[n]=Math.max(0,Number(data.qaza[n]||0)-1);
+   if(next==='missed')data.qaza[n]=Math.max(0,Number(data.qaza[n]||0))+1;
+   x[n]=next;
+   save();
+ });
+ document.querySelector('#qazaInputs').innerHTML=NAMES.map(n=>`<div class="qaza-row"><div><strong>${n}</strong><span class="small">Осталось восполнить</span></div><input aria-label="Остаток ${n}" type="number" min="0" step="1" data-qaza="${n}" value="${Math.max(0,Number(data.qaza[n]||0))}"></div>`).join('');
+ document.querySelector('#qazaTotal').textContent=NAMES.reduce((s,n)=>s+Number(data.qaza[n]||0),0);
+ document.querySelector('#qazaCompleteList').innerHTML=NAMES.map(n=>`<div class="qaza-row"><div><strong>${n}</strong><span class="small">Осталось: ${Math.max(0,Number(data.qaza[n]||0))}</span></div><button class="btn secondary" data-complete-qaza="${n}" ${Number(data.qaza[n]||0)<1?'disabled':''}>✓ Прочитал қаза</button></div>`).join('');
+ const completedToday=data.qazaDone.filter(x=>x.date===today()).length;
+ document.querySelector('#qazaDoneToday').textContent=`Сегодня восполнено: ${completedToday}`;
+ document.querySelectorAll('[data-complete-qaza]').forEach(b=>b.onclick=()=>{const n=b.dataset.completeQaza;if(Number(data.qaza[n]||0)>0){data.qaza[n]=Number(data.qaza[n])-1;data.qazaDone.push({prayer:n,date:today(),source:'qaza-screen'});save()}});
+ const doneQaza=data.qazaDone.length;document.querySelector('#statToday').textContent=NAMES.filter(n=>{const v=dayData()[n];return v===true||v==='read'}).length+'/5';let week=0;for(let i=0;i<7;i++){let x=new Date();x.setDate(x.getDate()-i);let k=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;week+=NAMES.filter(n=>data.daily[k]?.[n]===true||data.daily[k]?.[n]==='read').length}
+ document.querySelector('#statWeek').textContent=week;document.querySelector('#statQaza').textContent=doneQaza;
+ let hist=[];for(let i=0;i<7;i++){let x=new Date();x.setDate(x.getDate()-i);let k=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;hist.push(`<div class="task"><div><strong>${x.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'})}</strong></div><div>${NAMES.filter(n=>data.daily[k]?.[n]===true||data.daily[k]?.[n]==='read').length} / 5</div></div>`)}document.querySelector('#history').innerHTML=hist.join('');
+}
+document.querySelector('#saveQaza').onclick=()=>{document.querySelectorAll('[data-qaza]').forEach(i=>data.qaza[i.dataset.qaza]=Math.max(0,Math.floor(Number(i.value)||0)));save()};
+document.querySelector('#quickAdd').onclick=()=>{let n=document.querySelector('#quickPrayer').value,a=Math.floor(Number(document.querySelector('#quickAmount').value));if(a<1){alert('Укажи количество больше нуля.');return}data.qaza[n]=Math.max(0,Number(data.qaza[n]||0))+a;save()};
+function periodDays(){
+ const from=document.querySelector('#missedFrom').value;
+ const to=document.querySelector('#missedTo').value;
+ if(!from||!to)return {error:'Выбери обе даты.'};
+ const parse=v=>{const [y,m,d]=v.split('-').map(Number);return Date.UTC(y,m-1,d)};
+ const a=parse(from),b=parse(to);
+ if(!Number.isFinite(a)||!Number.isFinite(b))return {error:'Не удалось прочитать даты. Выбери их ещё раз.'};
+ if(b<a)return {error:'Дата окончания должна быть не раньше даты начала.'};
+ const days=Math.round((b-a)/86400000)+1;
+ if(days>36500)return {error:'Слишком большой период. Проверь даты.'};
+ return {days,from,to};
+}
+function showPeriodPreview(){
+ const r=periodDays(),el=document.querySelector('#periodPreview');
+ if(r.error){el.textContent=r.error;el.style.color='var(--red)';return null}
+ el.style.color='var(--muted)';
+ el.textContent=`Период ${r.from} — ${r.to}: ${r.days} дней. Будет добавлено по ${r.days} қаза каждого намаза, всего ${r.days*5}.`;
+ return r;
+}
+document.querySelector('#previewPeriod').type='button';
+document.querySelector('#calculatePeriod').type='button';
+document.querySelector('#previewPeriod').onclick=showPeriodPreview;
+document.querySelector('#calculatePeriod').onclick=()=>{
+ const r=showPeriodPreview();
+ if(!r)return;
+ const total=r.days*5;
+ if(!window.confirm(`Добавить по ${r.days} қаза каждого из 5 намазов (всего ${total}) к текущему остатку?`))return;
+ NAMES.forEach(n=>data.qaza[n]=Math.max(0,Number(data.qaza[n]||0))+r.days);
+ try{
+   localStorage.setItem(KEY,JSON.stringify(data));
+   render();
+   const el=document.querySelector('#periodPreview');
+   el.style.color='var(--green)';
+   el.textContent=`Добавлено! +${r.days} к каждому намазу, всего +${total}.`;
+ }catch(err){
+   alert('Не удалось сохранить данные в браузере. Проверь, не отключено ли хранилище сайта.');
+ }
+};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==b.dataset.tab));if(b.dataset.tab==='qaza')render()});
+render();
+
+// Установка приложения и офлайн-режим (доступны после публикации сайта по HTTPS).
+let deferredInstallPrompt=null;
+const installButton=document.querySelector('#installApp');
+window.addEventListener('beforeinstallprompt',event=>{
+ event.preventDefault();deferredInstallPrompt=event;installButton.style.display='inline-block';
+});
+installButton.addEventListener('click',async()=>{
+ if(!deferredInstallPrompt){alert('Чтобы установить приложение, открой его через HTTPS-ссылку в Chrome на Android и выбери «Установить приложение» в меню браузера.');return}
+ deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installButton.style.display='none';
+});
+window.addEventListener('appinstalled',()=>{installButton.style.display='none';});
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service worker:',err)));
+}
+</script>
+</body>
+</html>
